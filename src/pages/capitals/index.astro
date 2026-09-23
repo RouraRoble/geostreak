@@ -1,0 +1,47 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import MoreTools from '../../components/MoreTools.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Capitals from '../../islands/Capitals';
+import StatsModal from '../../islands/StatsModal';
+import { webAppLd } from '../../lib/seo';
+import { withBase } from '../../lib/url';
+import { CAPITALS_POOL } from '../../lib/countries';
+
+const title = 'Capital Ladder — Daily Capital Cities Quiz';
+const description = 'Ten rounds a day: match capitals to countries and countries to capitals, four options each. Score out of 10 and keep your streak alive.';
+const faqs = [
+  { q: 'How many rounds are in the Capital ladder?', a: `Ten rounds a day, drawn from ${CAPITALS_POOL.length} countries with a recognised capital. Some rounds show the capital and ask for the country; others show the country and ask for the capital.` },
+  { q: 'Is the round order the same for everyone on a given day?', a: 'Yes — the ten rounds and their four answer options are generated deterministically from the date, so everyone plays the same puzzle and a "challenge a friend" link reproduces it exactly.' },
+  { q: 'What counts as a win for the streak?', a: 'Scoring 5 or more out of 10 counts as a win for streak purposes; your exact score is always recorded in the score distribution either way.' },
+];
+---
+
+<Base title={title} description={description} image="/og/capitals.png" jsonLd={webAppLd({ name: 'GeoStreak Capitals', description, url: '/capitals/', features: ['Daily 10-round capital quiz', 'Two-way questions', 'Streak tracking', 'Share results'] })}>
+  <div class="container container--narrow section">
+    <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Capitals', url: '/capitals/' }]} />
+    <p class="eyebrow">Mode 2 of 3</p>
+    <h1>Climb the capital ladder</h1>
+    <p class="lead muted">Ten rounds, four options, no clock. Match capitals to countries — and countries to capitals.</p>
+
+    <Capitals client:load />
+    <StatsModal client:load />
+
+    <section class="container--narrow" style="margin-top:var(--space-10)">
+      <h2>How to play</h2>
+      <ol>
+        <li>Read the question: sometimes you're given a capital and pick the country, sometimes the reverse.</li>
+        <li>Pick one of four options — right or wrong is shown immediately, then the next round loads.</li>
+        <li>After round 10, your score and result strip are ready to share.</li>
+      </ol>
+      <p><a href={withBase("/outline/")}>Try the Outline puzzle →</a> · <a href={withBase("/bigger/")}>Try Bigger or smaller →</a> · <a href={withBase("/archive/")}>Browse the archive</a></p>
+    </section>
+
+    <AdSlot slot="capitals-below-how-to-play" minHeight={100} />
+
+    <Faq items={faqs} />
+    <MoreTools />
+  </div>
+</Base>

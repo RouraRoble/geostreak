@@ -1,0 +1,50 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import MoreTools from '../../components/MoreTools.astro';
+import { COUNTRIES } from '../../lib/countries';
+import { withBase } from '../../lib/url';
+
+const title = 'Every Country — Capital, Population, Area & Outline';
+const description = `A data page for all ${COUNTRIES.length} countries and territories covered by GeoStreak: capital, population, area, neighbours and outline shape for each.`;
+
+const byContinent = new Map<string, typeof COUNTRIES>();
+for (const c of COUNTRIES) {
+  const list = byContinent.get(c.continent) ?? [];
+  list.push(c);
+  byContinent.set(c.continent, list);
+}
+const continents = [...byContinent.keys()].sort();
+---
+
+<Base title={title} description={description}>
+  <div class="container container--narrow section prose">
+    <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Countries', url: '/country/' }]} />
+    <h1>{title}</h1>
+    <p>
+      Every country and territory in GeoStreak's dataset ({COUNTRIES.length} in total), grouped by continent. Each page has the
+      capital, population, area, neighbours and an outline shape sourced from Natural Earth and Wikidata — see{' '}
+      <a href={withBase("/about/")}>sources and methodology</a>.
+    </p>
+    {
+      continents.map((cont) => (
+        <section>
+          <h2>{cont}</h2>
+          <ul class="chip-list">
+            {byContinent
+              .get(cont)!
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((c) => (
+                <li>
+                  <a href={withBase(`/country/${c.slug}/`)}>
+                    {c.flagEmoji} {c.name}
+                  </a>
+                </li>
+              ))}
+          </ul>
+        </section>
+      ))
+    }
+    <MoreTools />
+  </div>
+</Base>

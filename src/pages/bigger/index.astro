@@ -1,0 +1,47 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import MoreTools from '../../components/MoreTools.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Bigger from '../../islands/Bigger';
+import StatsModal from '../../islands/StatsModal';
+import { webAppLd } from '../../lib/seo';
+import { withBase } from '../../lib/url';
+import { COMPARE_POOL } from '../../lib/countries';
+
+const title = 'Bigger or Smaller — Population & Area Quiz';
+const description = 'Ten rounds a day: pick the country with the bigger population or the bigger area. Build a combo, beat your score, keep your streak.';
+const faqs = [
+  { q: 'How is "bigger" decided?', a: `Each round compares either total population or land area between two countries drawn from ${COMPARE_POOL.length} with reliable figures — the values are revealed only after you pick.` },
+  { q: 'Where do the population and area figures come from?', a: 'Wikidata (CC0), the most recent recorded figure for each country as of the data snapshot date shown on the About page — see that page for the exact retrieval date and known limits.' },
+  { q: 'What is the combo counter?', a: 'It counts your current run of consecutive correct answers within the 10 rounds — it resets to 0 on a wrong answer, and your best combo of the round is shown at the end alongside your score.' },
+];
+---
+
+<Base title={title} description={description} image="/og/bigger.png" jsonLd={webAppLd({ name: 'GeoStreak Bigger or Smaller', description, url: '/bigger/', features: ['Daily 10-round comparison quiz', 'Population and area rounds', 'Streak tracking', 'Share results'] })}>
+  <div class="container container--narrow section">
+    <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Bigger or smaller', url: '/bigger/' }]} />
+    <p class="eyebrow">Mode 3 of 3</p>
+    <h1>Bigger or smaller?</h1>
+    <p class="lead muted">Two countries, one question: which has the bigger population — or area? Ten rounds, build a combo.</p>
+
+    <Bigger client:load />
+    <StatsModal client:load />
+
+    <section class="container--narrow" style="margin-top:var(--space-10)">
+      <h2>How to play</h2>
+      <ol>
+        <li>Each round names a metric — population or area — and shows two countries.</li>
+        <li>Pick the one you think is bigger; the real figures are revealed right after.</li>
+        <li>Chain correct answers for a bigger combo, then share your score out of 10.</li>
+      </ol>
+      <p><a href={withBase("/outline/")}>Try the Outline puzzle →</a> · <a href={withBase("/capitals/")}>Try the Capital ladder →</a> · <a href={withBase("/archive/")}>Browse the archive</a></p>
+    </section>
+
+    <AdSlot slot="bigger-below-how-to-play" minHeight={100} />
+
+    <Faq items={faqs} />
+    <MoreTools />
+  </div>
+</Base>

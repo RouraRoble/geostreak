@@ -1,0 +1,165 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import Share from '../../components/Share.astro';
+import MoreTools from '../../components/MoreTools.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { COUNTRIES, neighboursOf, DATA_GENERATED_AT, type Country } from '../../lib/countries';
+import { outlineFor } from '../../lib/outlines';
+import { absoluteUrl, withBase } from '../../lib/url';
+import { clampDescription } from '../../lib/seo';
+
+export function getStaticPaths() {
+  return COUNTRIES.map((country) => ({ params: { slug: country.slug }, props: { country } }));
+}
+
+const { country } = Astro.props as { country: Country };
+const c = country;
+const neighbours = neighboursOf(c);
+const path = outlineFor(c.iso2);
+
+const title = `${c.name} — Capital & Outline`;
+const popStr = c.population ? c.population.toLocaleString() : 'unknown';
+const areaStr = c.areaKm2 ? `${c.areaKm2.toLocaleString()} km²` : 'unknown';
+// A small set of non-UN-member places that are still commonly called "countries" in everyday usage
+// (a disputed/partly-recognised state, or a city-state with near-universal recognition); everything
+// else that isn't a UN member (Hong Kong, Puerto Rico, Greenland, the Faroes, ...) is a "territory".
+const COUNTRY_LIKE_NON_MEMBERS = new Set(['Taiwan', 'Kosovo', 'Palestine', 'Vatican City']);
+const placeNoun = c.unMember || COUNTRY_LIKE_NON_MEMBERS.has(c.name) ? 'country' : 'territory';
+// Avoid "a country in South America, South America" when the subregion and continent are the same name.
+const regionPhrase = c.subregion === c.continent ? c.continent : `${c.subregion}, ${c.continent}`;
+// A capital-less place (Hong Kong, Macao, ...) gets its own opening sentence instead of the
+// template-artefact-sounding "capital ... is not applicable" (audit-2 finding).
+const rest = `${c.name} is a ${placeNoun} in ${regionPhrase}, with a population of ${popStr} (${c.populationYear}) across ${areaStr}${c.areaRank ? ` (#${c.areaRank} by area)` : ''}.`;
+const description = clampDescription(c.capital ? `The capital of ${c.name} is ${c.capital}. ${rest}` : `${c.name} has no separate capital city. ${rest}`);
+
+const faqs = [
+  { q: `What is the capital of ${c.name}?`, a: c.capital ? `The capital of ${c.name} is ${c.capital}.${c.capitalNote ? ' ' + c.capitalNote : ''}` : `${c.name} does not have its own capital in this dataset — it is a territory rather than a fully independent state.` },
+  {
+    q: `Which countries border ${c.name}?`,
+    a: neighbours.length
+      ? `${c.name} shares a land border with ${neighbours.length} ${neighbours.length === 1 ? 'country' : 'countries'}: ${neighbours.map((n) => n.name).join(', ')}.`
+      : `${c.name} has no land borders — it is an island nation, an archipelago, or otherwise fully surrounded by water or another single enclosing territory.`,
+  },
+  { q: `What is the population of ${c.name}?`, a: `${c.name} has a population of about ${popStr} people, as of ${c.populationYear}${c.populationRank ? ` (the ${ordinal(c.populationRank)} most populous of the ${COUNTRIES.length} places covered here)` : ''}.` },
+  { q: `How big is ${c.name}?`, a: c.areaKm2 ? `${c.name} covers about ${areaStr}${c.areaRank ? `, the ${ordinal(c.areaRank)} largest of the ${COUNTRIES.length} places covered here` : ''}.` : `Area data for ${c.name} is not available in this dataset.` },
+];
+
+function ordinal(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+---
+
+<Base
+  title={title}
+  description={description}
+  image={`/og/country/${c.slug}.png`}
+  imageAlt={`Outline of ${c.name}`}
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'Place',
+    name: c.name,
+    url: absoluteUrl(`/country/${c.slug}/`),
+    geo: { '@type': 'GeoCoordinates', latitude: c.lat, longitude: c.lng },
+    containedInPlace: { '@type': 'Continent', name: c.continent },
+  }}
+>
+  <article class="container container--narrow section prose">
+    <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Countries', url: '/country/' }, { name: c.name, url: `/country/${c.slug}/` }]} />
+    <p class="eyebrow">{c.subregion === c.continent ? c.continent : `${c.continent} · ${c.subregion}`}</p>
+    <h1>
+      {c.flagEmoji} {c.name}
+    </h1>
+    <p class="lead">{description}</p>
+
+    {
+      path && (
+        <div class="country-outline" set:html={`<svg viewBox="0 0 512 512" role="img" aria-label="Outline of ${c.name}"><path d="${path}" /></svg>`} />
+      )
+    }
+
+    <div class="fact-grid">
+      <div class="fact-card">
+        <div class="fact-card__label">Capital</div>
+        <div class="fact-card__value">{c.capital ?? '—'}</div>
+      </div>
+      <div class="fact-card">
+        <div class="fact-card__label">Population ({c.populationYear})</div>
+        <div class="fact-card__value">{popStr}</div>
+        {c.populationRank && <div class="small muted">Rank #{c.populationRank} of {COUNTRIES.length}</div>}
+      </div>
+      <div class="fact-card">
+        <div class="fact-card__label">Area</div>
+        <div class="fact-card__value">{areaStr}</div>
+        {c.areaRank && <div class="small muted">Rank #{c.areaRank} of {COUNTRIES.length}</div>}
+      </div>
+      <div class="fact-card">
+        <div class="fact-card__label">Coordinates</div>
+        <div class="fact-card__value small">{c.lat.toFixed(2)}, {c.lng.toFixed(2)}</div>
+      </div>
+      <div class="fact-card">
+        <div class="fact-card__label">ISO codes</div>
+        <div class="fact-card__value small">{c.iso2} / {c.iso3}</div>
+      </div>
+      <div class="fact-card">
+        <div class="fact-card__label">UN member state</div>
+        <div class="fact-card__value small">{c.unMember ? 'Yes' : 'No'}</div>
+      </div>
+    </div>
+
+    <h2>Neighbouring countries</h2>
+    {
+      neighbours.length ? (
+        <ul class="chip-list">
+          {neighbours.map((n) => (
+            <li>
+              <a href={withBase(`/country/${n.slug}/`)}>
+                {n.flagEmoji} {n.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="muted">{c.name} has no land borders.</p>
+      )
+    }
+
+    <div class="card" style="margin:var(--space-8) 0">
+      {
+        c.daily ? (
+          <>
+            <p style="margin-bottom:var(--space-3)">Think you'd recognise {c.name} from its outline alone? It's in the daily rotation — find out in today's puzzle.</p>
+            <a class="btn" href={withBase('/outline/')}>Play today's Outline puzzle</a>
+          </>
+        ) : (
+          <>
+            <p style="margin-bottom:var(--space-3)">{c.name} is too small (or too scattered) to be fairly guessable by shape, so it doesn't appear in the daily Outline rotation — but you can still test yourself on today's puzzle country.</p>
+            <a class="btn" href={withBase('/outline/')}>Play today's Outline puzzle</a>
+          </>
+        )
+      }
+    </div>
+
+    <Faq items={faqs} title={`${c.name} — quick facts`} />
+
+    <AdSlot slot="country-page-below-faq" minHeight={100} />
+
+    <Share url={absoluteUrl(`/country/${c.slug}/`)} text={`${c.name}: capital, neighbours, population and outline on GeoStreak`} />
+
+    <p class="small muted" style="margin-top:var(--space-8)">
+      Data: Natural Earth (public domain) and Wikidata (CC0), snapshot {DATA_GENERATED_AT}. See <a href={withBase("/about/")}>sources and methodology</a>.
+    </p>
+
+    <MoreTools />
+  </article>
+</Base>
+
+<style>
+  .lead {
+    font-size: var(--text-lg);
+    color: var(--fg-muted);
+  }
+</style>

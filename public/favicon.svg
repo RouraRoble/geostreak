@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="GeoStreak">
+  <rect width="64" height="64" rx="14" fill="#0b1220" />
+  <g fill="none" stroke="#fb923c" stroke-width="2.4" stroke-linecap="round">
+    <circle cx="27" cy="34" r="16" />
+    <ellipse cx="27" cy="34" rx="6.4" ry="16" />
+    <path d="M11 34h32" />
+    <path d="M13.5 25.5c3.7 2 24.3 2 27 0" />
+    <path d="M13.5 42.5c3.7-2 24.3-2 27 0" />
+  </g>
+  <g fill="#fb923c">
+    <circle cx="45" cy="14" r="2.6" />
+    <circle cx="51.5" cy="18.5" r="3.2" />
+    <circle cx="56.5" cy="25" r="3.8" />
+  </g>
+</svg>

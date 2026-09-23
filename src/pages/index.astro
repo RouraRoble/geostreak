@@ -1,0 +1,93 @@
+---
+import Base from '../layouts/Base.astro';
+import Faq from '../components/Faq.astro';
+import MoreTools from '../components/MoreTools.astro';
+import StreakSummary from '../islands/StreakSummary';
+import StatsModal from '../islands/StatsModal';
+import { site } from '../site.config';
+import { webAppLd } from '../lib/seo';
+import { withBase } from '../lib/url';
+import { COUNTRIES } from '../lib/countries';
+import { clampDescription } from '../lib/seo';
+
+const faqs = [
+  { q: `Is ${site.name} free?`, a: 'Yes. All three games run entirely in your browser — no account, no sign-up, nothing to install.' },
+  { q: 'Does my streak sync between devices?', a: 'Not automatically: streaks live in your browser\'s local storage only. Open the stats panel to copy a backup code or download a JSON file, then import it on another device.' },
+  { q: 'What time does a new puzzle start?', a: 'All three puzzles reset together at 00:00 UTC.' },
+  { q: 'Is there a country data page for every country?', a: `Yes — every one of the ${COUNTRIES.length} countries and territories in the dataset has its own page with capital, population, area, neighbours and outline. Start at the ` },
+];
+faqs[3].a += `<a href="${withBase('/country/')}">countries index</a>.`;
+
+const modes = [
+  { href: '/outline/', icon: '🗺️', title: 'Outline', blurb: 'Guess the country from its silhouette in 6 tries.' },
+  { href: '/capitals/', icon: '🏛️', title: 'Capitals', blurb: 'Match capitals to countries, 10 rounds a day.' },
+  { href: '/bigger/', icon: '⚖️', title: 'Bigger or smaller', blurb: 'Pick the bigger population or area, 10 rounds.' },
+];
+---
+
+<Base title={`${site.name} — ${site.tagline}`} description={clampDescription(site.description, 158)} jsonLd={webAppLd({ features: ['Outline mode', 'Capital ladder mode', 'Bigger or smaller mode', 'Streak tracking', `${COUNTRIES.length} country data pages`] })}>
+  <section class="hero container atlas-bg">
+    <p class="eyebrow">Three free daily geography games</p>
+    <h1>{site.tagline}</h1>
+    <p class="lead">{site.description}</p>
+    <StreakSummary client:load />
+  </section>
+
+  <section class="container" aria-label="Today's puzzles">
+    <div class="mode-grid">
+      {
+        modes.map((m) => (
+          <a class="mode-card" href={withBase(m.href)}>
+            <span class="mode-card__icon" aria-hidden="true">
+              {m.icon}
+            </span>
+            <span class="mode-card__title">{m.title}</span>
+            <span class="muted">{m.blurb}</span>
+            <span class="mode-card__status">Play today's puzzle →</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="container container--narrow">
+    <h2>How it works</h2>
+    <ol>
+      <li>Pick a mode — each one resets at 00:00 UTC with a new puzzle for everyone.</li>
+      <li>Play; every guess gives you a hint (distance, direction, correctness).</li>
+      <li>Finish to see your result and a spoiler-free emoji grid you can share.</li>
+      <li>Come back tomorrow to keep the streak going — miss a day and it resets.</li>
+    </ol>
+    <p>
+      Curious about a specific country instead? Browse the <a href={withBase("/country/")}>full country index</a> — capital, population,
+      area, neighbours and outline for all {COUNTRIES.length} of them.
+    </p>
+  </section>
+
+  <section class="container container--narrow">
+    <Faq items={faqs} />
+  </section>
+
+  <div class="container container--narrow">
+    <MoreTools />
+  </div>
+
+  <StatsModal client:load />
+</Base>
+
+<style>
+  .hero {
+    padding-block: var(--space-12) var(--space-8);
+    text-align: center;
+  }
+  .hero .lead {
+    font-size: var(--text-lg);
+    color: var(--fg-muted);
+    max-width: 46rem;
+    margin-inline: auto;
+  }
+  .hero :global(.field-row) {
+    justify-content: center;
+    margin-top: var(--space-5);
+  }
+</style>

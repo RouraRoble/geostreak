@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import MoreTools from '../../components/MoreTools.astro';
+import Archive from '../../islands/Archive';
+import { site } from '../../site.config';
+import { withBase } from '../../lib/url';
+
+const title = 'Puzzle Archive';
+const description = `Past GeoStreak daily puzzles by number and date. Replay any of them in practice mode — it never affects your streak or reveals today's answer.`;
+---
+
+<Base title={title} description={description}>
+  <div class="container container--narrow section prose">
+    <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Archive', url: '/archive/' }]} />
+    <h1>{title}</h1>
+    <p>
+      Replay any past puzzle in practice mode. Practice rounds never affect your streak and never spoil today's puzzle — they're
+      just for fun, or to compare notes with a friend playing the same date.
+    </p>
+    <Archive client:load />
+    <p class="small muted" style="margin-top:var(--space-6)">Daily puzzle #1 was {site.epoch}. Want today's real puzzle instead?</p>
+    <p><a href={withBase("/outline/")}>Outline</a> · <a href={withBase("/capitals/")}>Capitals</a> · <a href={withBase("/bigger/")}>Bigger or smaller</a></p>
+    <MoreTools />
+  </div>
+</Base>

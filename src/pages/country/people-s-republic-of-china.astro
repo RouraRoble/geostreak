@@ -1,0 +1,25 @@
+---
+// Redirect for the old China slug: "People's Republic of China" was the display name (and therefore
+// the slug) before the `China` NAMES override was added (audit-1 P1 fix). If that build ever went
+// live, `/country/people-s-republic-of-china/` could be indexed or bookmarked, so it 404ing with no
+// redirect is a real broken-link risk (audit-2 P3 finding) even though the slug change itself is
+// correct. This static page sends both browsers (meta refresh) and crawlers (canonical) to the
+// current page rather than leaving a dead link.
+import Base from '../../layouts/Base.astro';
+import { absoluteUrl, withBase } from '../../lib/url';
+
+const target = withBase('/country/china/');
+const title = "China's page has moved";
+const description = "“People's Republic of China” is now listed as China on GeoStreak — capital, neighbours, population and outline. You'll be redirected automatically.";
+---
+
+<Base title={title} description={description} canonical={absoluteUrl('/country/china/')} noindex>
+  <Fragment slot="head">
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+  </Fragment>
+  <section class="container container--narrow section">
+    <h1>This page has moved</h1>
+    <p>"People's Republic of China" is now listed as <a href={target}>China</a>.</p>
+    <p><a class="btn" href={target}>Continue to the China page →</a></p>
+  </section>
+</Base>

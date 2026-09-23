@@ -1,0 +1,97 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { site } from '../site.config';
+import { withBase } from '../lib/url';
+import { COUNTRIES, DATA_SOURCES, DATA_GENERATED_AT, CAPITALS_POOL, COMPARE_POOL } from '../lib/countries';
+import { OUTLINE_POOL } from '../lib/outlines';
+
+const title = `About ${site.name}`;
+const description = `How ${site.name}'s three daily geography games work, where the country data comes from, and how the daily puzzle is chosen.`;
+---
+
+<Base title={title} description={description}>
+  <article class="container container--narrow section prose">
+    <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'About', url: '/about/' }]} />
+    <h1>{title}</h1>
+    <p class="small muted">Data last updated: {DATA_GENERATED_AT}</p>
+    <p>{site.description}</p>
+
+    <h2>The three games</h2>
+    <ul>
+      <li><strong>Outline</strong> — a daily silhouette drawn from a curated pool of {OUTLINE_POOL.length} countries large and distinct enough to be recognisable by shape alone; 6 guesses, with distance, compass direction and a proximity percentage after each one.</li>
+      <li><strong>Capitals</strong> — 10 multiple-choice rounds a day drawn from {CAPITALS_POOL.length} countries with a recorded capital, mixing "capital → country" and "country → capital" questions.</li>
+      <li><strong>Bigger or smaller</strong> — 10 rounds a day comparing population or land area between two of {COMPARE_POOL.length} countries with both figures on record.</li>
+    </ul>
+
+    <h2>How the daily puzzle is chosen</h2>
+    <p>
+      Nothing is random and nothing is server-generated: the puzzle for each mode is derived entirely in your browser from the
+      current UTC date. Each mode's country pool is shuffled once with a seeded algorithm (so the order looks random but is
+      fixed), and the day's puzzle number selects the next country in that fixed order — so the full pool has to be exhausted
+      before any country repeats, and everyone who opens the page on the same UTC day sees the same puzzle. Puzzle #1 is{' '}
+      {site.epoch} (days before that are puzzle #0 and lower). Practice links from the <a href={withBase("/archive/")}>archive</a> or a "challenge a friend" button reuse this same
+      mechanism with a past date or a random seed, and never affect your streak.
+    </p>
+
+    <h2>Distance, direction and proximity (Outline mode)</h2>
+    <p>
+      Distance is the <strong>great-circle distance</strong> between the geographic centre points (roughly the label point Natural
+      Earth uses for each country) of your guess and the answer, using the haversine formula on a spherical Earth
+      (radius 6,371.0088&nbsp;km). Direction is that same bearing, snapped to the nearest of 8 compass points. Proximity is a
+      percentage that is 100% for an exact match and falls smoothly to 0% at the antipodal point (halfway around the world),
+      so a guess on the correct continent still scores meaningfully higher than one on the far side of the planet.
+    </p>
+
+    <h2>Data sources & licences</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Source</th><th>Used for</th><th>Licence</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Natural Earth 1:50m Admin 0 — Countries</td><td>Country outline shapes, adjacency (shared borders), continent/subregion grouping, and the population/area fallback below</td><td>Public domain</td></tr>
+          <tr><td>Wikidata</td><td>Capitals, population, area, ISO codes, coordinates</td><td>CC0 (public domain dedication)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted">{DATA_SOURCES.naturalEarth} · {DATA_SOURCES.wikidata}.</p>
+    <p>
+      Outline shapes are simplified (Douglas–Peucker simplification) from the Natural Earth polygons and re-projected with an
+      azimuthal equal-area projection centred on each country, so shapes are proportionate and not stretched by their
+      position on the globe. A small number of far-flung overseas islands are dropped from a country's outline where keeping
+      them would make the silhouette harder to draw at this resolution rather than more recognisable — the fact pages'
+      coordinates and area figures still cover the whole country.
+    </p>
+    <p>
+      Population figures use each place's most recent Wikidata population statement dated 2022 or later. Where no such
+      recent statement exists, the figure instead falls back to Natural Earth's own population estimate — a single,
+      older snapshot (year shown next to the figure on each country's page, since it isn't the same year for every
+      place). Either way, treat every population and area figure as a single point-in-time snapshot, not live data.
+      Some entries (dependent territories such as Hong Kong or Macao) do not have their own head-of-state capital in
+      the strict sense and are marked accordingly rather than guessed at. Countries with more than one capital city
+      (for example South Africa or Bolivia) show the primary capital used for the games, with the constitutional
+      detail noted on that country's page.
+    </p>
+
+    <h2>Fairness of the daily seed</h2>
+    <p>
+      Because the seed is a deterministic function of the public UTC date and mode name — not of who is asking or from
+      where — every player sees the same puzzle on the same day, and nobody (including us) can see tomorrow's answer early or
+      target a specific player with an easier or harder puzzle.
+    </p>
+
+    <h2>Privacy by design</h2>
+    <p>
+      {site.name} runs entirely in your browser. Guesses, scores and streaks are not uploaded anywhere; they live in your
+      browser's local storage until you clear it or export a backup. See the <a href={withBase("/privacy/")}>privacy policy</a>.
+    </p>
+
+    <h2>Who maintains it</h2>
+    <p>
+      Built and maintained by <a href={site.author.url} rel="noopener">{site.author.name}</a>. Launched {site.launched}. Found a
+      data error or a bug? <a href={withBase("/contact/")}>Get in touch</a> with the exact page and the correct figure plus a source, and
+      we'll fix it.
+    </p>
+  </article>
+</Base>

@@ -1,0 +1,58 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import MoreTools from '../../components/MoreTools.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Outline from '../../islands/Outline';
+import StatsModal from '../../islands/StatsModal';
+import { site } from '../../site.config';
+import { withBase } from '../../lib/url';
+import { webAppLd } from '../../lib/seo';
+import { OUTLINE_POOL } from '../../lib/outlines';
+
+const title = 'Outline — Guess the Country from Its Shape';
+const description = 'A new country silhouette every day. Six guesses, with distance, direction and proximity hints after each one — plus a spoiler-free emoji result to share.';
+const faqs = [
+  { q: 'How does the daily Outline puzzle work?', a: `Every day (UTC) picks a new country from a pool of ${OUTLINE_POOL.length} recognisable shapes. You get 6 guesses; after each one you see the distance, compass direction and a proximity percentage to the answer.` },
+  { q: 'What does the proximity percentage mean?', a: 'It is 100% for an exact match and falls the further your guess is from the true country, down to 0% at the opposite side of the planet — calculated from the great-circle distance between the two countries’ centre points.' },
+  { q: 'Does the outline ever get rotated or resized to hide the answer?', a: 'No — every silhouette is shown at a consistent, unrotated projection centred on the country, simplified from Natural Earth boundary data. Very small or scattered territories are excluded from the daily pool because their outline alone is not identifiable.' },
+  { q: 'What is hard mode?', a: 'Hard mode hides the compass direction and proximity percentage after each guess, leaving only the distance — turn it on from the Stats panel.' },
+  { q: 'Can I practice without losing my streak?', a: 'Yes — links from the archive and "challenge a friend" links use a fixed practice seed and never affect your daily streak.' },
+];
+---
+
+<Base title={title} description={description} image="/og/outline.png" jsonLd={webAppLd({ name: 'GeoStreak Outline', description, url: '/outline/', features: ['Daily country silhouette', 'Distance, direction and proximity hints', 'Streak tracking', 'Share results'] })}>
+  <div class="container container--narrow section">
+    <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Outline', url: '/outline/' }]} />
+    <p class="eyebrow">Mode 1 of 3</p>
+    <h1>Guess the country from its outline</h1>
+    <p class="lead muted">One shape, six guesses. Every guess tells you how close you are and which way to look next.</p>
+
+    <Outline client:load />
+    <StatsModal client:load />
+
+    <section class="container--narrow" style="margin-top:var(--space-10)">
+      <h2>How to play</h2>
+      <ol>
+        <li>Study today's silhouette — no rotation, no distortion beyond the projection.</li>
+        <li>Type a country into the guess box and pick it from the list, or press Enter on an exact match.</li>
+        <li>After each guess, read the distance, compass arrow and proximity percentage to narrow down the next one.</li>
+        <li>Solve it in 6 or fewer guesses to keep your streak alive, then share your spoiler-free emoji grid.</li>
+      </ol>
+      <p><a href={withBase("/capitals/")}>Try the Capital ladder →</a> · <a href={withBase("/bigger/")}>Try Bigger or smaller →</a> · <a href={withBase("/archive/")}>Browse the archive</a></p>
+    </section>
+
+    <AdSlot slot="outline-below-how-to-play" minHeight={100} />
+
+    <Faq items={faqs} />
+    <MoreTools />
+  </div>
+</Base>
+
+<style>
+  .lead {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-6);
+  }
+</style>
